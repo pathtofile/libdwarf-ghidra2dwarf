@@ -83,5 +83,4 @@ When ready to create a new source distribution do
 a build and then 
   make dist
 
-David Anderson.  Updated May 2021
-
+David Anderson.  Updated by pathtofile in JAn 2026 for MacOS ARM support.
