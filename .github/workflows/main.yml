@@ -58,8 +58,7 @@ jobs:
       - name: Build
         run: |
           cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_NON_SHARED=FALSE -DBUILD_SHARED=TRUE -DHAVE_ZLIB=FALSE -B build .
-          cd build/libdwarf
-          cmake --build .
+          cmake --build build
 
       - name: Release file
         uses: softprops/action-gh-release@v2
