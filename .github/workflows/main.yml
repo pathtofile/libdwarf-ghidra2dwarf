@@ -5,79 +5,100 @@ on:
     branches:
       - 'master'
 
+permissions:
+  contents: write
+
 jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
 
       - name: Install cmake
-        uses: lukka/get-cmake@v4.2.1
-      
+        uses: lukka/get-cmake@latest
+
       - name: Build
         run: |
           cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_NON_SHARED=FALSE -DBUILD_SHARED=TRUE -DHAVE_ZLIB=FALSE -B build .
           cd build/libdwarf
           cmake --build .
-      
+
       - name: Release file
-        uses: djnicholson/release-action@v2.11
+        uses: softprops/action-gh-release@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          asset-name: 'libdwarf.so'
-          file: 'build/libdwarf/libdwarf.so'
-          tag-name: 'latest'
-          release-name: 'Latest build'
-      
-      - uses: actions/upload-artifact@v2
+          tag_name: latest
+          name: Latest build
+          files: build/libdwarf/libdwarf.so
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@v4
         with:
           name: libdwarf-linux
           path: build/libdwarf/libdwarf.so
 
   build-windows:
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
     steps:
-      - uses: actions/checkout@v2
-    
-      - name: Install cmake
-        uses: lukka/get-cmake@v4.2.1
-      
+      - uses: actions/checkout@v6
+
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+
       - name: Build
         run: |
-          cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_NON_SHARED=FALSE -DBUILD_SHARED=TRUE -DHAVE_ZLIB=FALSE -B build .
+          cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_NON_SHARED=FALSE -DBUILD_SHARED=TRUE -DHAVE_ZLIB=FALSE -B build .
           cd build/libdwarf
           cmake --build .
-      
+
       - name: Release file
-        uses: djnicholson/release-action@v2.11
+        uses: softprops/action-gh-release@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          asset-name: 'libdwarf.dll'
-          file: 'build/libdwarf/libdwarf.dll'
-          tag-name: 'latest'
-          release-name: 'Latest build'
+          tag_name: latest
+          name: Latest build
+          files: build/libdwarf/libdwarf.dll
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libdwarf-windows
+          path: build/libdwarf/libdwarf.dll
 
   build-macos:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
 
       - name: Install cmake
-        uses: lukka/get-cmake@v4.2.1
-      
+        uses: lukka/get-cmake@latest
+
       - name: Build
         run: |
           cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_NON_SHARED=FALSE -DBUILD_SHARED=TRUE -DHAVE_ZLIB=FALSE -B build .
           cd build/libdwarf
           cmake --build .
-      
+
       - name: Release file
-        uses: djnicholson/release-action@v2.11
+        uses: softprops/action-gh-release@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          asset-name: 'libdwarf.dylib'
-          file: 'build/libdwarf/libdwarf.dylib'
-          tag-name: 'latest'
-          release-name: 'Latest build'
-    
-    
+          tag_name: latest
+          name: Latest build
+          files: build/libdwarf/libdwarf.dylib
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libdwarf-macos
+          path: build/libdwarf/libdwarf.dylib
